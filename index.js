@@ -12,25 +12,46 @@ function formatTime (millis) {
  * The profiler has two arguments: a step msg and an optional reset for the internal timer
  * It will display the execution time per step and total from latest rest
  */
-function profiler (testName) {
-  var begin
-    , lastStep;
-
-  return function (msg, reset) {
-    var elapsed;
-
-    if (!begin) { begin = new Date(); }
-    if (!lastStep) { lastStep = new Date(); }
-
-    elapsedTotal = (new Date()).getTime() - begin.getTime();
-    elapsedStep = (new Date()).getTime() - lastStep.getTime();
-
-    lastStep = new Date();
-    if (reset) { begin = new Date(); }
-
-    console.log(testName + " - " + msg + ' - ' + formatTime(elapsedStep) + " (total: " + formatTime(elapsedTotal) + ")");
-  };
+function Profiler (name) {
+  this.name = name;
 }
 
 
-module.exports = profiler;
+Profiler.prototype.beginProfiling = function () {
+  console.log(this.name + ' - Begin profiling');
+  this.resetTimers();
+};
+
+
+Profiler.prototype.resetTimers = function () {
+  this.sinceBeginning = new Date();
+  this.sinceLastStep = new Date();
+};
+
+
+Profiler.prototype.elapsedSinceBeginning = function () {
+  return (new Date()).getTime() - this.sinceBeginning.getTime();
+}
+
+
+Profiler.prototype.elapsedSinceLastStep = function () {
+  return (new Date()).getTime() - this.sinceLastStep.getTime();
+}
+
+
+Profiler.prototype.step = function (msg) {
+  var elapsedSinceBeginning;
+
+  if (!this.sinceBeginning || !this.sinceLastStep) {
+    console.log(this.name + ' - ' + msg + ' - You must call beginProfiling before registering steps');
+    return;
+  }
+
+  console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")");
+
+  this.sinceLastStep = new Date();
+};
+
+
+
+module.exports = Profiler;
