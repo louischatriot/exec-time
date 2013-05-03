@@ -27,7 +27,7 @@ You can reset the timer by using the `resetTimers` function:
 
 ```javascript
 var execTime = require('exec-time')
-  , profiler = execTime('demo2');
+  , profiler = new execTime('demo2');
 
 profiler.beginProfiling();
 // DB access taking 350ms here
@@ -51,7 +51,7 @@ You can also directly access the raw timers values (in ms) with the
 
 ```javascript
 var execTime = require('exec-time')
-  , profiler = execTime('demo2');
+  , profiler = new execTime('demo3');
 
 profiler.beginProfiling();
 // DB access taking 350ms here
@@ -62,9 +62,9 @@ console.log("Number of ms since the last step: " + profiler.elapsedSinceLastStep
 console.log("Number of ms since the beginning: " + profiler.elapsedSinceBeginning());
 
 /* Output
-demo2 - Beginning profiling
-demo2 - Accessed DB - 350ms (total: 350ms)
-demo2 - Processed data - 850ms (total: 1.2s)
+demo3 - Beginning profiling
+demo3 - Accessed DB - 350ms (total: 350ms)
+demo3 - Processed data - 850ms (total: 1.2s)
 Number of ms since the last step: 850
 Number of ms since the beginning: 1200
 */
