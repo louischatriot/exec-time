@@ -33,7 +33,7 @@ profiler('Beginning profiling');
 // DB access taking 350ms here
 profiler('Accessed DB');
 // Data processing taking 850ms
-profiler('Processed data', true);
+profiler('Processed data', true);   // Reset timer after this step
 // Rendering taking 120ms
 profiler('Rendered page');
 
@@ -41,6 +41,6 @@ profiler('Rendered page');
 demo2 - Beginning profiling - 0ms (total: 0ms)
 demo2 - Accessed DB - 350ms (total: 350ms)
 demo2 - Processed data - 850ms (total: 1.2s)
-demo2 - Rendered page - 120ms (total: 120ms)
+demo2 - Rendered page - 120ms (total: 120ms)   // The total is 120ms not 1.3s
 */
 ```
