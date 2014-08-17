@@ -1,20 +1,29 @@
 var util = require('util');
 
 function formatTime (time, precision) {
-  // if we're dealing with ms, round up to seconds at least 1 second
+  // If we're dealing with ms, round up to seconds when time is at least 1 second
   if (time > 1000 && precision == 'ms') {
     return (Math.floor(time / 100) / 10) + ' s';
-  }
-  else {
+  } else {
     return time.toFixed(3) + ' ' + precision;
   }
 }
 
-// get time in ms
+// get time in ns
 function getTime() {
   var t = process.hrtime();
   return (t[0] * 1e9 + t[1]);
 }
+
+
+console.log(getTime());
+
+var a = getTime();
+setTimeout(function() {
+  console.log((getTime() - a) / 1e6);
+}, 1175);
+
+
 
 /**
  * Create a profiler with name testName to monitor the execution time of a route

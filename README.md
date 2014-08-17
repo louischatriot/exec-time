@@ -71,7 +71,8 @@ demo2 - Rendered page - 120ms (total: 120ms)   // Timers were reset
 */
 ```
 
-You can directly access the current timer values (in nanoseconds) with the
+You can directly access the current timer values (in the timer's
+precision) with the
 `elapsedSinceBeginning` and `elapsedSinceLastStep` methods:
 
 ```javascript
