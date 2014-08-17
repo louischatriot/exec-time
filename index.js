@@ -2,7 +2,7 @@ function formatTime (millis) {
   var millis = millis / 1e6;
 
   if (millis < 1000) {
-    return millis + " ms";
+    return millis.toFixed(3) + " ms";
   } else {
     return (Math.floor(millis / 100) / 10) + " s";
   }
@@ -53,6 +53,14 @@ Profiler.prototype.elapsedSinceLastStep = function () {
   return getTime() - this.lastStep;
 }
 
+// Return the deltas between steps, in nanoseconds
+
+Profiler.prototype.getSteps = function () {
+  return this.steps.map(function(curr, index, arr) {
+    if (index === 0) return;
+    return [curr[0], (curr[1] - arr[index-1][1])];
+  }).slice(1);
+}
 
 Profiler.prototype.step = function (msg) {
   if (!this.sinceBeginning || !this.lastStep) {
