@@ -25,7 +25,7 @@ demo1 - Rendered page - 120ms (total: 1.3s)
 
 You can disable logging to the console by passing in `false` after the timer name and access the steps later.  
 
-```
+```javascript
 var execTime = require('exec-time')
   , profiler = new execTime('demo2', false);
 
