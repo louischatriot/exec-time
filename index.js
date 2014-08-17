@@ -1,11 +1,18 @@
 function formatTime (millis) {
+  var millis = millis / 1e6;
+
   if (millis < 1000) {
-    return millis + "ms";
+    return millis + " ms";
   } else {
-    return (Math.floor(millis / 100) / 10) + "s";
+    return (Math.floor(millis / 100) / 10) + " s";
   }
 }
 
+// get time in ms
+function getTime() {
+  var t = process.hrtime();
+  return (t[0] * 1e9 + t[1]);
+}
 
 /**
  * Create a profiler with name testName to monitor the execution time of a route
@@ -24,32 +31,30 @@ Profiler.prototype.beginProfiling = function () {
 
 
 Profiler.prototype.resetTimers = function () {
-  this.sinceBeginning = new Date();
-  this.sinceLastStep = new Date();
+  this.sinceBeginning = getTime();
+  this.lastStep = getTime();
 };
 
 
 Profiler.prototype.elapsedSinceBeginning = function () {
-  return (new Date()).getTime() - this.sinceBeginning.getTime();
+  return getTime() - this.sinceBeginning;
 }
 
 
 Profiler.prototype.elapsedSinceLastStep = function () {
-  return (new Date()).getTime() - this.sinceLastStep.getTime();
+  return getTime() - this.lastStep;
 }
 
 
 Profiler.prototype.step = function (msg) {
-  var elapsedSinceBeginning;
-
-  if (!this.sinceBeginning || !this.sinceLastStep) {
+  if (!this.sinceBeginning || !this.lastStep) {
     console.log(this.name + ' - ' + msg + ' - You must call beginProfiling before registering steps');
     return;
   }
 
   console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")");
 
-  this.sinceLastStep = new Date();
+  this.lastStep = getTime();
 };
 
 
