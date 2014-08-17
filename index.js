@@ -18,17 +18,21 @@ function getTime() {
  * Create a profiler with name testName to monitor the execution time of a route
  * The profiler has two arguments: a step msg and an optional reset for the internal timer
  * It will display the execution time per step and total from latest rest
+ *
+ * Optional logToConsole flag, which defaults to true, causes steps to be printed to console.
+ * otherwise, they can be accessed from Profiler.steps array.
  */
-function Profiler (name) {
+function Profiler (name, logToConsole) {
   this.name = name;
   this.steps = [];
   this.sinceBeginning = null;
   this.lastStep = null;
+  this.logToConsole = typeof(logToConsole) === 'undefined' ? true : logToConsole;
 }
 
 
 Profiler.prototype.beginProfiling = function () {
-  console.log(this.name + ' - Begin profiling');
+  if (this.logToConsole) { console.log(this.name + ' - Begin profiling'); }
   this.resetTimers();
 };
 
@@ -56,7 +60,7 @@ Profiler.prototype.step = function (msg) {
     return;
   }
 
-  console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")");
+  if (this.logToConsole) { console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")"); }
 
   this.lastStep = getTime();
   this.steps.push([msg, this.lastStep]);
