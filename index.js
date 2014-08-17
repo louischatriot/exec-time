@@ -1,11 +1,6 @@
 var util = require('util');
 
-function formatTime (nanos, precision) {
-  var divisor = 1;
-  if (precision === 'ms') divisor = 1e6;
-
-  var time = nanos / divisor;
-
+function formatTime (time, precision) {
   // if we're dealing with ms, round up to seconds at least 1 second
   if (time > 1000 && precision == 'ms') {
     return (Math.floor(time / 100) / 10) + ' s';
@@ -36,6 +31,9 @@ function Profiler (name, logToConsole, precision) {
   this.lastStep = null;
   this.logToConsole = typeof(logToConsole) === 'undefined' ? true : logToConsole;
   this.precision = typeof(precision) === 'undefined' ? 'ms' : precision
+  this.divisor = 1;
+
+  if (precision === 'ms') this.divisor = 1e6;
 }
 
 
@@ -53,23 +51,23 @@ Profiler.prototype.resetTimers = function () {
 
 
 Profiler.prototype.elapsedSinceBeginning = function () {
-  return getTime() - this.sinceBeginning;
+  return (getTime() - this.sinceBeginning) / this.divisor;
 }
 
 
 Profiler.prototype.elapsedSinceLastStep = function () {
-  return getTime() - this.lastStep;
+  return (getTime() - this.lastStep) / this.divisor;
 }
 
 // Return the deltas between steps, in nanoseconds
 
 Profiler.prototype.getSteps = function () {
-  var divisor = 1;
-  if (this.precision === 'ms') divisor = 1e6;
+  var divisor = this.divisor;
 
   return this.steps.map(function(curr, index, arr) {
     if (index === 0) return;
-    return [curr[0], (curr[1] - arr[index-1][1]) / divisor];
+    var delta = (curr[1] - arr[index-1][1]);
+    return [curr[0], (delta / divisor)];
   }).slice(1);
 }
 
