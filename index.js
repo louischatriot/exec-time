@@ -1,10 +1,17 @@
-function formatTime (millis) {
-  var millis = millis / 1e6;
+var util = require('util');
 
-  if (millis < 1000) {
-    return millis.toFixed(3) + " ms";
-  } else {
-    return (Math.floor(millis / 100) / 10) + " s";
+function formatTime (nanos, precision) {
+  var divisor = 1;
+  if (precision === 'ms') divisor = 1e6;
+
+  var time = nanos / divisor;
+
+  // if we're dealing with ms, round up to seconds at least 1 second
+  if (time > 1000 && precision == 'ms') {
+    return (Math.floor(time / 100) / 10) + ' s';
+  }
+  else {
+    return time.toFixed(3) + ' ' + precision;
   }
 }
 
@@ -22,12 +29,13 @@ function getTime() {
  * Optional logToConsole flag, which defaults to true, causes steps to be printed to console.
  * otherwise, they can be accessed from Profiler.steps array.
  */
-function Profiler (name, logToConsole) {
+function Profiler (name, logToConsole, precision) {
   this.name = name;
   this.steps = [];
   this.sinceBeginning = null;
   this.lastStep = null;
   this.logToConsole = typeof(logToConsole) === 'undefined' ? true : logToConsole;
+  this.precision = typeof(precision) === 'undefined' ? 'ms' : precision
 }
 
 
@@ -56,19 +64,33 @@ Profiler.prototype.elapsedSinceLastStep = function () {
 // Return the deltas between steps, in nanoseconds
 
 Profiler.prototype.getSteps = function () {
+  var divisor = 1;
+  if (this.precision === 'ms') divisor = 1e6;
+
   return this.steps.map(function(curr, index, arr) {
     if (index === 0) return;
-    return [curr[0], (curr[1] - arr[index-1][1])];
+    return [curr[0], (curr[1] - arr[index-1][1]) / divisor];
   }).slice(1);
 }
 
 Profiler.prototype.step = function (msg) {
   if (!this.sinceBeginning || !this.lastStep) {
-    console.log(this.name + ' - ' + msg + ' - You must call beginProfiling before registering steps');
+    console.log(util.format(
+      '%s - %s - You must call beginProfiling before registering steps',
+      this.name,
+      msg
+    ));
     return;
   }
 
-  if (this.logToConsole) { console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")"); }
+  if (this.logToConsole) { 
+    console.log(util.format('%s - %s - %s (total: %s)',
+      this.name, 
+      msg,
+      formatTime(this.elapsedSinceLastStep(), this.precision),
+      formatTime(this.elapsedSinceBeginning(), this.precision)
+    ));
+  }
 
   this.lastStep = getTime();
   this.steps.push([msg, this.lastStep]);
