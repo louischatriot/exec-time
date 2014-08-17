@@ -21,6 +21,9 @@ function getTime() {
  */
 function Profiler (name) {
   this.name = name;
+  this.steps = [];
+  this.sinceBeginning = null;
+  this.lastStep = null;
 }
 
 
@@ -33,6 +36,7 @@ Profiler.prototype.beginProfiling = function () {
 Profiler.prototype.resetTimers = function () {
   this.sinceBeginning = getTime();
   this.lastStep = getTime();
+  this.steps.push(['BEGIN_TIMER', this.lastStep])
 };
 
 
@@ -55,6 +59,7 @@ Profiler.prototype.step = function (msg) {
   console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")");
 
   this.lastStep = getTime();
+  this.steps.push([msg, this.lastStep]);
 };
 
 
