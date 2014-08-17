@@ -1,55 +1,97 @@
-function formatTime (millis) {
-  if (millis < 1000) {
-    return millis + "ms";
-  } else {
-    return (Math.floor(millis / 100) / 10) + "s";
+var util = require('util');
+
+function formatTime (time, precision) {
+  // if we're dealing with ms, round up to seconds at least 1 second
+  if (time > 1000 && precision == 'ms') {
+    return (Math.floor(time / 100) / 10) + ' s';
+  }
+  else {
+    return time.toFixed(3) + ' ' + precision;
   }
 }
 
+// get time in ms
+function getTime() {
+  var t = process.hrtime();
+  return (t[0] * 1e9 + t[1]);
+}
 
 /**
  * Create a profiler with name testName to monitor the execution time of a route
  * The profiler has two arguments: a step msg and an optional reset for the internal timer
  * It will display the execution time per step and total from latest rest
+ *
+ * Optional logToConsole flag, which defaults to true, causes steps to be printed to console.
+ * otherwise, they can be accessed from Profiler.steps array.
  */
-function Profiler (name) {
+function Profiler (name, logToConsole, precision) {
   this.name = name;
+  this.steps = [];
+  this.sinceBeginning = null;
+  this.lastStep = null;
+  this.logToConsole = typeof(logToConsole) === 'undefined' ? true : logToConsole;
+  this.precision = typeof(precision) === 'undefined' ? 'ms' : precision
+  this.divisor = 1;
+
+  if (precision === 'ms') this.divisor = 1e6;
 }
 
 
 Profiler.prototype.beginProfiling = function () {
-  console.log(this.name + ' - Begin profiling');
+  if (this.logToConsole) { console.log(this.name + ' - Begin profiling'); }
   this.resetTimers();
 };
 
 
 Profiler.prototype.resetTimers = function () {
-  this.sinceBeginning = new Date();
-  this.sinceLastStep = new Date();
+  this.sinceBeginning = getTime();
+  this.lastStep = getTime();
+  this.steps.push(['BEGIN_TIMER', this.lastStep])
 };
 
 
 Profiler.prototype.elapsedSinceBeginning = function () {
-  return (new Date()).getTime() - this.sinceBeginning.getTime();
+  return (getTime() - this.sinceBeginning) / this.divisor;
 }
 
 
 Profiler.prototype.elapsedSinceLastStep = function () {
-  return (new Date()).getTime() - this.sinceLastStep.getTime();
+  return (getTime() - this.lastStep) / this.divisor;
 }
 
+// Return the deltas between steps, in nanoseconds
+
+Profiler.prototype.getSteps = function () {
+  var divisor = this.divisor;
+
+  return this.steps.map(function(curr, index, arr) {
+    if (index === 0) return;
+    var delta = (curr[1] - arr[index-1][1]);
+    return [curr[0], (delta / divisor)];
+  }).slice(1);
+}
 
 Profiler.prototype.step = function (msg) {
-  var elapsedSinceBeginning;
-
-  if (!this.sinceBeginning || !this.sinceLastStep) {
-    console.log(this.name + ' - ' + msg + ' - You must call beginProfiling before registering steps');
+  if (!this.sinceBeginning || !this.lastStep) {
+    console.log(util.format(
+      '%s - %s - You must call beginProfiling before registering steps',
+      this.name,
+      msg
+    ));
     return;
   }
 
-  console.log(this.name + " - " + msg + ' - ' + formatTime(this.elapsedSinceLastStep()) + " (total: " + formatTime(this.elapsedSinceBeginning()) + ")");
+  if (this.logToConsole) { 
+    console.log(util.format('%s - %s - %s (total: %s)',
+      this.name, 
+      msg,
+      formatTime(this.elapsedSinceLastStep(), this.precision),
+      formatTime(this.elapsedSinceBeginning(), this.precision)
+    ));
+  }
 
-  this.sinceLastStep = new Date();
+  this.lastStep = getTime();
+  this.steps.push([msg, this.lastStep]);
 };
 
 
