@@ -1,6 +1,6 @@
 {
   "name": "exec-time"
-, "version": "0.0.3"
+, "version": "0.0.4"
 , "author": { "name": "Louis Chatriot", "email": "louis.chatriot@gmail.com"}
 , "description": "See how much time every step of a script takes to execute"
 , "keywords": [

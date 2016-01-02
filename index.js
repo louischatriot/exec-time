@@ -42,7 +42,7 @@ function Profiler (name, logToConsole, precision) {
   this.precision = typeof(precision) === 'undefined' ? 'ms' : precision
   this.divisor = 1;
 
-  if (precision === 'ms') this.divisor = 1e6;
+  if (this.precision === 'ms') this.divisor = 1e6;
 }
 
 
